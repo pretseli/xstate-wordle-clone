@@ -39,8 +39,6 @@ function WordGridCell({ char, status }) {
 }
 
 function WordGrid({ words }) {
-  const letters = _.flatten(words) || [];
-
   return (
     <div
       style={{
@@ -77,18 +75,25 @@ const KEY_ROWS = [
   _.toArray("ZXCVBNM"),
 ];
 
-const wordsToMap = (letters) =>
+const KEY_PRIORITIES = [KEY_PENDING, KEY_WRONG, KEY_PARTIAL, KEY_CORRECT];
+
+const selectCharStatus = (status1, status2) =>
+  KEY_PRIORITIES[
+    Math.max(KEY_PRIORITIES.indexOf(status1), KEY_PRIORITIES.indexOf(status2))
+  ];
+
+const guessesToStatusByChar = (letters) =>
   _.reduce(
     letters,
     (acc, { char, status }) => ({
       ...acc,
-      [char]: status,
+      [char]: selectCharStatus(status, acc[char]),
     }),
     {}
   );
 
 const KeyRows = ({ words }) => {
-  const statusMap = wordsToMap(_.flatten(words));
+  const statusMap = guessesToStatusByChar(_.flatten(words));
   return KEY_ROWS.map((row) => (
     <div key={row.join()}>
       {row.map((key) => (
@@ -112,10 +117,10 @@ const KeyRows = ({ words }) => {
 };
 
 function App() {
-  const [state, send] = useMachine(wordleMachine, { devTools: true });
+  const [state, send, actor] = useMachine(wordleMachine, { devTools: true });
 
-  const guesses = state?.context?.guesses;
-  const currentGuess = state?.context.currentGuess;
+  const guesses = useSelector(actor, (s) => s?.context?.guesses);
+  const currentGuess = useSelector(actor, (s) => s?.context.currentGuess);
 
   const gridGuesses = [...guesses, currentGuess];
 
@@ -153,15 +158,19 @@ function App() {
         <main>
           <WordGrid words={gridGuesses} />
           <KeyRows words={gridGuesses} />
-          {state.matches("stopped.win") && <p>You won!</p>}
-          {state.matches("stopped.win") && <p>You lost!</p>}
-          {state.matches("stopped") && (
+          {state.matches("stopped.won") && <p>You won!</p>}
+          {state.matches("stopped.lost") && (
             <>
-              <p>The right word was "{state.context.targetWord}".</p>
-              <button type="button" onClick={() => send("START_GAME")}>
-                Try again!
-              </button>
+              <p>You lost!</p>
+              <p>
+                The correct word was &quot;{state.context.targetWord}&quot;.
+              </p>
             </>
+          )}
+          {state.matches("stopped") && (
+            <button type="button" onClick={() => send("START_GAME")}>
+              Play again!
+            </button>
           )}
         </main>
       </div>
