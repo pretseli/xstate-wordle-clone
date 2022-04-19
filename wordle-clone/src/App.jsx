@@ -2,7 +2,8 @@ import "./App.css";
 import _ from "lodash";
 
 import { useEffect } from "react";
-import { useMachine } from "@xstate/react";
+import { useMachine, useSelector } from "@xstate/react";
+import { inspect } from "@xstate/inspect";
 import {
   GUESS_AMOUNT,
   WORD_LENGTH,
@@ -12,6 +13,10 @@ import {
   KEY_WRONG,
   KEY_PENDING,
 } from "./wordle-machine";
+
+inspect({
+  iframe: false, // open in new window
+});
 
 const COLOR_BY_STATUS = {
   [KEY_CORRECT]: "limegreen",

@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@xstate/inspect": "^0.6.5",
     "@xstate/react": "^3.0.0",
     "lodash": "^4.17.21",
     "react": "^17.0.2",
@@ -16,7 +17,6 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^1.0.7",
-    "@xstate/inspect": "^0.6.5",
     "eslint": "^8.13.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.5.0",
