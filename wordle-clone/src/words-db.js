@@ -1,4 +1,5 @@
 import _ from "lodash";
+/* eslint-disable-next-line import/no-unresolved */
 import wordDB from "./wordle-nyt-answers-alphabetical.txt?raw";
 
 export const wordsArr = wordDB.trim().split("\n");
