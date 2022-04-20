@@ -5,6 +5,7 @@ export const wordsArr = wordDB.trim().split("\n");
 
 export const pickRandomWord = () => wordsArr[_.random(0, wordsArr.length - 1)];
 
+// This returns a rejected Promise 25% of the time, for demonstration purposes :)
 export const pickRandomWordAsync = () =>
   new Promise((resolve, reject) => {
     setTimeout(

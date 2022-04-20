@@ -116,6 +116,25 @@ const KeyRows = ({ words }) => {
   ));
 };
 
+function Overlay({ children }) {
+  return (
+    <div
+      style={{
+        fontSize: "30px",
+        display: "flex",
+        position: "fixed",
+        width: "100%",
+        height: "100%",
+        backgroundColor: "rgba(255,255,255,0.9)",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <div>{children}</div>
+    </div>
+  );
+}
+
 function App() {
   const [state, send, actor] = useMachine(wordleMachine, { devTools: true });
 
@@ -136,21 +155,17 @@ function App() {
 
   return (
     <>
+      {state.matches("initializing") && <Overlay>Starting...</Overlay>}
       {state.matches("started.invalid_guess") && (
-        <div
-          style={{
-            fontSize: "30px",
-            display: "flex",
-            position: "fixed",
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(255,255,255,0.9)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <div>{state.context.error}</div>
-        </div>
+        <Overlay>{state.context.error}</Overlay>
+      )}
+      {state.matches("stopped.error") && (
+        <Overlay>
+          <p>{state.context.error}</p>
+          <button type="button" onClick={() => send("START_GAME")}>
+            Try again!
+          </button>
+        </Overlay>
       )}
       <div className="App">
         <h1>Wordle</h1>

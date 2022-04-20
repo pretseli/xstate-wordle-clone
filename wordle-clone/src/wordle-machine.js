@@ -1,6 +1,6 @@
 import { assign, createMachine } from "xstate";
 import _ from "lodash";
-import { checkWordExists, pickRandomWord } from "./words-db";
+import { checkWordExists, pickRandomWordAsync } from "./words-db";
 
 export const WORD_LENGTH = 5;
 export const GUESS_AMOUNT = 6;
@@ -28,24 +28,38 @@ const getCurrentWord = (ctx) =>
 export const wordleMachine = createMachine(
   {
     id: "WordleMachine",
-    initial: "started",
+    initial: "initializing",
     context: {
       guesses: [],
-      currentGuess: "",
+      currentGuess: [],
       targetWord: null,
       error: null,
     },
     states: {
+      initializing: {
+        id: "initializing",
+        entry: "resetContext",
+        invoke: {
+          id: "pickRandomWord",
+          src: pickRandomWordAsync,
+          onDone: {
+            target: "#started",
+            actions: assign({
+              targetWord: (ctx, e) => e.data,
+            }),
+          },
+          onError: {
+            target: "#error",
+            actions: assign({
+              error: () => "Error starting new game!",
+            }),
+          },
+        },
+      },
       started: {
         id: "started",
-        initial: "initializing",
+        initial: "guessing",
         states: {
-          initializing: {
-            always: {
-              actions: "resetContext",
-              target: "guessing",
-            },
-          },
           invalid_guess: {
             after: {
               1000: "guessing",
@@ -109,16 +123,22 @@ export const wordleMachine = createMachine(
       },
       stopped: {
         states: {
+          error: {
+            id: "error",
+            on: {
+              START_GAME: "#initializing",
+            },
+          },
           won: {
             id: "won",
             on: {
-              START_GAME: "#started",
+              START_GAME: "#initializing",
             },
           },
           lost: {
             id: "lost",
             on: {
-              START_GAME: "#started",
+              START_GAME: "#initializing",
             },
           },
         },
@@ -152,7 +172,8 @@ export const wordleMachine = createMachine(
       resetContext: assign({
         guesses: () => [],
         currentGuess: () => [],
-        targetWord: () => pickRandomWord(),
+        targetWord: () => null,
+        error: () => null,
       }),
       freezeCurrentGuess: assign({
         guesses: (ctx) => [...ctx.guesses, checkCurrentGuess(ctx)],
