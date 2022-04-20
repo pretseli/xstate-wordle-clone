@@ -1,14 +1,14 @@
 import { assign, createMachine } from "xstate";
 import _ from "lodash";
 import { checkWordExists, pickRandomWordAsync } from "./words-db";
-
-export const WORD_LENGTH = 5;
-export const GUESS_AMOUNT = 6;
-
-export const KEY_CORRECT = "CORRECT";
-export const KEY_PARTIAL = "PARTIAL";
-export const KEY_WRONG = "WRONG";
-export const KEY_PENDING = "PENDING";
+import {
+  GUESS_AMOUNT,
+  KEY_CORRECT,
+  KEY_PARTIAL,
+  KEY_PENDING,
+  KEY_WRONG,
+  WORD_LENGTH,
+} from "./helpers";
 
 export const checkCurrentGuess = (ctx) =>
   ctx.currentGuess.map(({ char }, i) => {
